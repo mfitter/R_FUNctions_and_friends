@@ -1,0 +1,141 @@
+---
+title: "HMN corr matrix"
+author: "Megan Fitter"
+date: "4/23/2021"
+output: html_document
+---
+
+```{r}
+
+library(readr)
+sbs<- read_csv("~/Documents/HMN/Scripts paper data/SBS Final Brain Data/Updated 2-25-21/SBS Brain Data Cleaned For Analyses only Mplus Vars 3-19-21.csv")
+varsToRemove<-c("X1", "head_hipp", "body_hipp" ,  "tail_hipp",  "L_hipp", "R_hipp")
+sbs<-sbs[,-which(names(sbs) %in% varsToRemove)]
+
+#install.packages("apaTables")
+library(apaTables)
+
+```
+
+```{r}
+#https://rdrr.io/cran/apaTables/man/apa.cor.table.html
+#apa.cor.table(
+#  data,
+#  filename = NA,
+#  table.number = NA,
+#  show.conf.interval = TRUE,
+#  show.sig.stars = TRUE,
+#  landscape = TRUE
+#)
+
+
+#Make a document from the code below (name it .doc)
+#copy and paste the table from the word doc into excel
+#edit as you'd like
+#copy and paste the excel table into word.
+```
+
+```{r}
+
+apa.cor.table(
+ sbs,
+  filename = "Scripts Correlation Matrix.doc",
+  table.number = NA,
+  show.conf.interval = FALSE,
+  show.sig.stars = TRUE,
+  landscape = TRUE
+)
+
+
+apa.cor.table(
+ sbs,
+  filename = "Scripts Correlation Matrix.rtf",
+  table.number = NA,
+  show.conf.interval = FALSE,
+  show.sig.stars = TRUE,
+  landscape = TRUE
+)
+
+```
+
+```{r}
+cor.test(sbs$Gender, sbs$ExactAge)
+
+#biserial corr
+#https://stackoverflow.com/questions/16281667/p-value-for-polyserial-correlation
+
+library(polycor)
+biserial<-polyserial(sbs$ExactAge, sbs$Gender, std.err=TRUE)
+#0.4021 estimate
+#se = .1468
+std.err_biserial <- sqrt(biserial$var[1, 1])
+#se
+
+p_biserial<- 2 * pnorm(-abs(biserial$rho / std.err_biserial))
+p_biserial
+#p = .0.006
+
+#I could probably create a function to do that...
+
+#function to give the estimate and the p value
+
+library(polycor)
+biserialPval <- function(x, y) {
+  biserial<-polyserial(x, y, std.err=TRUE)
+  std.err_biserial <- sqrt(biserial$var[1, 1])
+  p_biserial<- 2 * pnorm(-abs(biserial$rho / std.err_biserial))
+  return(c("rb=",biserial$rho,"p=",p_biserial))
+}
+
+biserialPval(sbs$ExactAge, sbs$Gender)
+#"rb="                 "0.402101356272361"   
+#"p=" "0.00614410735091913"
+
+biserialPval(sbs$Total_Hipp, sbs$Gender)
+#"rb="                 "0.464294635609949"   
+#"p="                 "0.00115725557801157"
+biserialPval(sbs$ICV, sbs$Gender)
+#"rb="                 "0.691394531267998"   
+#"p=" "2.3982477306888e-10"
+biserialPval(sbs$LeftAmygdala, sbs$Gender)
+#"rb="                  "0.547436936250852"   
+#"p="                   "3.13237081074488e-05"
+biserialPval(sbs$RightAmygdala, sbs$Gender)
+#"rb="                  "0.657207781071776"   
+#"p="                   "2.60230028970243e-08"
+biserialPval(sbs$CerebralWhiteMatterVol_new, sbs$Gender)
+#[1] "rb="                  "0.630229134456983"   
+#[3] "p="                   "5.32127887598586e-07"
+biserialPval(sbs$TotalGrayVol_new, sbs$Gender)
+#[1] "rb="                "0.488699288027506" 
+#"p="                 "0.0009675000015053"
+biserialPval(sbs$avo_mean, sbs$Gender)
+#[1] "rb="                "0.0814854143771692"
+#[3] "p="                 "0.663086073962867" 
+biserialPval(sbs$anx_mean, sbs$Gender)
+#[1] "rb="                "0.0875738475820741"
+#[3] "p="                 "0.643521721903546" 
+biserialPval(sbs$script, sbs$Gender)
+#[1] "rb="               "0.120472437838019" 
+#"p=" "0.483461087257153"
+biserialPval(sbs$unsupportive, sbs$Gender)
+#[1] "rb="                "0.0372890961069571"
+#[3] "p="                 "0.842573477303951" 
+biserialPval(sbs$supportive, sbs$Gender)
+#[1] "rb="                 "-0.0106593676574515"
+#[3] "p="                  "0.955059562275558" 
+biserialPval(sbs$Total_Thalamus, sbs$Gender)
+#[1] "rb="                 "0.457220015439011"  
+#[3] "p="                  "0.00129239965430548"
+biserialPval(sbs$Total_Amygdala, sbs$Gender)
+#[1] "rb="                  "0.669114028616872"   
+#[3] "p="                   "5.73772859323279e-09"
+biserialPval(sbs$Total_LatOcc_new, sbs$Gender)
+#[1] "rb="                "0.325601674575173" 
+#[3] "p="                 "0.0566967052740219"
+biserialPval(sbs$SubCortGrayVol_new, sbs$Gender)
+#"rb="               "0.087793513808654" 
+#"p="               "0.626050735217522"
+colnames(sbs)
+```
+
